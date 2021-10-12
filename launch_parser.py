@@ -1,15 +1,6 @@
 import xml.etree.ElementTree as ET
 from typing import List
 
-
-# tree = ET.parse("clover.launch")
-# root = tree.getroot()
-# for elem in root:
-#     if elem.tag == "arg":
-#         print(elem.tag, elem.attrib)
-#         elem.attrib["default"] = elem.attrib["default"] + "1"
-# tree.write("test.launch")
-
 class Argument:
     def __init__(self, arg: ET.Element, rule: dict) -> None:
         self.arg = arg
