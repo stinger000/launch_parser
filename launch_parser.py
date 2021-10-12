@@ -1,12 +1,6 @@
-from _typeshed import Self
-from os import name
-import xml.dom.minidom as minidom
 import xml.etree.ElementTree as ET
+from typing import List
 
-# doc = minidom.parse("clover.launch")
-# items = doc.getElementsByTagName("arg")
-# for i in items:
-#     print(i.attributes['name'].value, i.attributes['default'].value)
 
 # tree = ET.parse("clover.launch")
 # root = tree.getroot()
@@ -17,26 +11,37 @@ import xml.etree.ElementTree as ET
 # tree.write("test.launch")
 
 class Argument:
-    def __init__(self, arg, rule) -> None:
+    def __init__(self, arg: ET.Element, rule: dict) -> None:
         self.arg = arg
         self.rule = rule
         
     def get(self):
-        pass
+        return self.arg.attrib["default"]
+
+    def get_name(self):
+        return self.rule.get("name")
 
     def get_datatype(self):
         return self.rule.get("datatype")
 
     def set(self, new_val):
-        Self.validate(new_val)
+        if self.validate(new_val):
+            self.arg.attrib["default"] = str(new_val)
 
     def validate(self):
-        pass
+        return True
 
 class ArgumentBool(Argument):
-    pass
+    def get(self):
+        s: str = super().get()
+        if s.lower() == "false":
+            return False
+        return True
 
 def get_argument_class_from_datatype(datatype: str):
+    """
+    Return Argument class corresponding to given datatype
+    """
     types = {"bool" : ArgumentBool,}
     argument_class = types.get(datatype)
     if not argument_class:
@@ -45,6 +50,8 @@ def get_argument_class_from_datatype(datatype: str):
         return argument_class
 
 class LaunchParser:
+    filtered_args: List[Argument]
+
     def __init__(self, file: str, rules: list):
         self.tree = ET.parse(file)
         root = self.tree.getroot()
@@ -52,16 +59,16 @@ class LaunchParser:
         self.filtered_args = []
         for arg in self.args:
             for rule in rules:
-                if arg.attrib[name] == rule[name]:
+                if arg.attrib["name"] == rule["name"]:
                     # add new filtered_arg
-                    argument_class = get_argument_class_from_datatype(rule.get)
+                    argument_class = get_argument_class_from_datatype(rule.get("datatype"))
                     self.filtered_args.append(argument_class(arg, rule))
                     break
         
 
 
-    def parse(self, rules):
-        pass
+    def get_args(self):
+        return self.filtered_args
 
 class LaunchDescription:
     def __init__(self, file) -> None:
@@ -79,4 +86,7 @@ class LaunchDescription:
 l = LaunchDescription("description.xml")
 clover_args = l.get_file_description("clover.launch")
 # print(clover_args)
-LaunchParser("test.launch", clover_args)
+pars =  LaunchParser("clover.launch", clover_args)
+a = pars.get_args()
+for i in a:
+    print(i.get_name(), i.get_datatype(), i.get())
