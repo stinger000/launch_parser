@@ -1,0 +1,11 @@
+<descriprion>
+    <file name="clover.launch">
+        <arg name="aruco" datatype="bool"/>
+        <arg name="optical_flow" datatype="bool"/>
+    </file>
+
+    <file name="aruco.launch">
+        <arg name="aruco" datatype="bool"/>
+        <arg name="aruco" datatype="bool"/>
+    </file>
+</descriprion>
