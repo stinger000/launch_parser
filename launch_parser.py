@@ -37,12 +37,37 @@ class ArgumentBool(Argument):
         if s.lower() == "false":
             return False
         return True
+        
+    def set(self, new_val):
+        if new_val:
+            self.arg.attrib["default"] = "true"
+        else:
+            self.arg.attrib["default"] = "false"
+
+class ArgumentStr(Argument):
+    pass
+
+class ArgumentInt(Argument):
+    def get(self):
+        return int(super().get())
+
+class ArgumentFloat(Argument):
+    def get(self):
+        return float(super().get())
+
+class ArgumentEnum(Argument):
+    def get_variants(self):
+        return self.rule["items"]
 
 def get_argument_class_from_datatype(datatype: str):
     """
     Return Argument class corresponding to given datatype
     """
-    types = {"bool" : ArgumentBool,}
+    types = {"bool" : ArgumentBool,
+            "str" : ArgumentStr,
+            "int" : ArgumentInt,
+            "float" : ArgumentFloat,
+            "enum" : ArgumentEnum}
     argument_class = types.get(datatype)
     if not argument_class:
         raise ValueError(f"Unknown datatype - {datatype}")
@@ -77,16 +102,24 @@ class LaunchDescription:
     
     def get_file_description(self, filename: str):
         sections = self.tree.findall(f".//*[@name='{filename}']/arg")
-        args = [i.attrib.copy() for i in sections]
+        args = []
+        for i in sections:
+            attrib = i.attrib.copy()
+            if i.attrib["datatype"] == "enum":
+                items = i.findall("item")
+                attrib["items"] = [item.attrib["value"]for item in items]
+            args.append(attrib)
+
         return args
             
     
 
         
 l = LaunchDescription("description.xml")
-clover_args = l.get_file_description("clover.launch")
-# print(clover_args)
-pars =  LaunchParser("clover.launch", clover_args)
+clover_args = l.get_file_description("aruco.launch")
+pars =  LaunchParser("aruco.launch", clover_args)
 a = pars.get_args()
 for i in a:
     print(i.get_name(), i.get_datatype(), i.get())
+    if i.get_datatype() == "enum":
+        print(i.get_variants())

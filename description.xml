@@ -2,10 +2,23 @@
     <file name="clover.launch">
         <arg name="aruco" datatype="bool"/>
         <arg name="optical_flow" datatype="bool"/>
+        <arg name="fcu_conn" datatype="str"/>
+        <arg name="fcu_sys_id" datatype="int"/>
     </file>
 
     <file name="aruco.launch">
-        <arg name="aruco" datatype="bool"/>
+        <arg name="aruco_detect" datatype="bool"/>
+        <arg name="placement" datatype="enum">
+            <item value="floor"/>
+            <item value="ceiling"/>
+            <item value="unknown"/>
+        </arg>
+    </file>
+    <file name="test">
+        <arg name="tesst" datatype="enum">
+            <item value="test1"/>
+            <item value="test2"/>
+        </arg>
         <arg name="aruco" datatype="bool"/>
     </file>
 </descriprion>
