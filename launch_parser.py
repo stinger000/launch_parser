@@ -1,3 +1,5 @@
+from _typeshed import Self
+from os import name
 import xml.dom.minidom as minidom
 import xml.etree.ElementTree as ET
 
@@ -15,19 +17,47 @@ import xml.etree.ElementTree as ET
 # tree.write("test.launch")
 
 class Argument:
-    pass
+    def __init__(self, arg, rule) -> None:
+        self.arg = arg
+        self.rule = rule
+        
+    def get(self):
+        pass
+
+    def get_datatype(self):
+        return self.rule.get("datatype")
+
+    def set(self, new_val):
+        Self.validate(new_val)
+
+    def validate(self):
+        pass
 
 class ArgumentBool(Argument):
     pass
 
+def get_argument_class_from_datatype(datatype: str):
+    types = {"bool" : ArgumentBool,}
+    argument_class = types.get(datatype)
+    if not argument_class:
+        raise ValueError(f"Unknown datatype - {datatype}")
+    else:
+        return argument_class
+
 class LaunchParser:
-    def __init__(self, file: str, rule: dict):
+    def __init__(self, file: str, rules: list):
         self.tree = ET.parse(file)
         root = self.tree.getroot()
         self.args = [elem for elem in root if elem.tag == "arg"]
-        for i in self.args:
-            if any([i.attrib["name"] == line["name"] for line in rule]):
-                print(i.attrib)
+        self.filtered_args = []
+        for arg in self.args:
+            for rule in rules:
+                if arg.attrib[name] == rule[name]:
+                    # add new filtered_arg
+                    argument_class = get_argument_class_from_datatype(rule.get)
+                    self.filtered_args.append(argument_class(arg, rule))
+                    break
+        
 
 
     def parse(self, rules):
